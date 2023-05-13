@@ -3,8 +3,17 @@
 interface
 
 uses
-  System.SysUtils, System.Types, System.UITypes, System.Classes, System.Variants, FMX.Types, System.IOUtils, FMX.Utils, FMX.Graphics,
-  TensorFlowLiteFMX;
+  System.SysUtils,
+  System.Types,
+  System.UITypes,
+  System.Classes,
+  System.Variants,
+  FMX.Types,
+  System.IOUtils,
+  FMX.Utils,
+  FMX.Graphics,
+  TensorFlowLiteFMX
+  ;
 
 const
   FaceLandmarkInputSize = 160;
