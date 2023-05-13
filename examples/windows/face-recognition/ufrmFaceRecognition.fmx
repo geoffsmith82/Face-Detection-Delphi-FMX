@@ -106,6 +106,13 @@ object frmFaceRecognition: TfrmFaceRecognition
     Text = 'Label1'
     TabOrder = 19
   end
+  object Button1: TButton
+    Position.X = 272.000000000000000000
+    Position.Y = 293.000000000000000000
+    TabOrder = 22
+    Text = 'Button1'
+    OnClick = Button1Click
+  end
   object ImageList: TImageList
     Source = <
       item
@@ -1396,5 +1403,22 @@ object frmFaceRecognition: TfrmFaceRecognition
     Destination = <>
     Left = 73
     Top = 153
+  end
+  object PhysPgDriverLink: TFDPhysPgDriverLink
+    VendorLib = 'C:\Program Files\PostgreSQL\psqlODBC\bin\libpq.dll'
+    Left = 328
+    Top = 56
+  end
+  object EmbeddingConnection: TFDConnection
+    Params.Strings = (
+      'Server=172.24.15.23'
+      'Database=embeddings'
+      'User_Name=geoff'
+      'Password=HelloWorld!'
+      'CharacterSet=UTF8'
+      'DriverID=PG')
+    LoginPrompt = False
+    Left = 340
+    Top = 8
   end
 end

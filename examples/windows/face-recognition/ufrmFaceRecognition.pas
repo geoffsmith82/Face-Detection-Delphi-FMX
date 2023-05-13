@@ -12,6 +12,7 @@ uses
   System.UITypes,
   System.Classes,
   System.Variants,
+  System.IOUtils,
   FMX.Types,
   FMX.Controls,
   FMX.Forms,
@@ -32,7 +33,25 @@ uses
   FMX.ComboEdit,
   FMX.Memo.Types,
   TensorFlowLiteFMX,
-  FaceRecognitionFMX
+  FaceRecognitionFMX,
+  FireDAC.Phys.PGDef,
+  FireDAC.Stan.Intf,
+  FireDAC.Phys,
+  FireDAC.Phys.PG,
+  FireDAC.Stan.Option,
+  FireDAC.Stan.Error,
+  FireDAC.UI.Intf,
+  FireDAC.Phys.Intf,
+  FireDAC.Stan.Def,
+  FireDAC.Stan.Pool,
+  FireDAC.Stan.Async,
+  FireDAC.FMXUI.Wait,
+  FireDAC.Comp.Client,
+  FireDAC.Stan.Param,
+  FireDAC.DatS,
+  FireDAC.DApt.Intf,
+  FireDAC.DApt,
+  Data.DB
   ;
 
 type
@@ -48,11 +67,15 @@ type
     Memo2: TMemo;
     lblDetectionInfo: TLabel;
     Label1: TLabel;
+    PhysPgDriverLink: TFDPhysPgDriverLink;
+    EmbeddingConnection: TFDConnection;
+    Button1: TButton;
     procedure FormCreate(Sender: TObject);
     procedure btnOpenFileImageAClick(Sender: TObject);
     procedure btnCompareAandBImageClick(Sender: TObject);
     procedure btnOpenFileImageBClick(Sender: TObject);
     procedure FormDestroy(Sender: TObject);
+    procedure Button1Click(Sender: TObject);
   private
     { Private declarations }
     FFaceRec : TFaceRecognition;
@@ -147,6 +170,50 @@ begin
 
   LoadImage(OpenDialog.FileName, ImageB);
 {$ENDIF MSWINDOWS}
+end;
+
+procedure TfrmFaceRecognition.Button1Click(Sender: TObject);
+var
+  query : TFDQuery;
+  filenames : TArray<string>;
+  i, j: Integer;
+  ImageA : TImage;
+  LFaceEmbeddingA, LFaceEmbeddingB, LFaceEmbeddingC: TOutputDataFaceNet;
+begin
+  query := TFDQuery.Create(nil);
+  try
+    query.Connection := EmbeddingConnection;
+    filenames := TDirectory.GetFiles('D:\Programming\ADUG\Symposium2023\Libs\FaceRecognition\Face-Detection-Delphi-FMX\examples\windows\face-recognition\Win64\Release\images\', '*.jpg');
+
+    for i := 0 to High(filenames) do
+    begin
+      ImageA := TImage.Create(nil);
+      try
+        ImageA.Bitmap := TBitmap.Create;
+        ImageA.Bitmap.LoadFromFile(filenames[i]);
+        FFaceRec.CreateFaceEmbedding(ImageA, LFaceEmbeddingA);
+        var vectorStr : string := '[';
+        vectorStr := vectorStr + LFaceEmbeddingA[0].ToString + ', ';
+        for j := 1 to High(LFaceEmbeddingA)  do
+        begin
+          vectorStr := vectorStr + LFaceEmbeddingA[j].ToString + ', ';
+        end;
+        vectorStr := vectorStr.TrimRight;
+        vectorStr := vectorStr.TrimRight([',']);
+        vectorStr := vectorStr + ']';
+        query.SQL.Text := 'INSERT INTO "PeopleEmbeddings" (filename, embedding) VALUES(:file, cast(:vect as VECTOR));';
+        query.ParamByName('file').AsString := ExtractFilename(filenames[i]);
+        query.ParamByName('vect').Size := 10000;
+        query.ParamByName('vect').AsString := vectorStr;
+        query.ExecSQL;
+
+      finally
+        FreeAndNil(ImageA);
+      end;
+    end;
+  finally
+    FreeAndNil(query);
+  end;
 end;
 
 function CosineDistance(const Vector1, Vector2: TOutputDataFaceNet): Double;

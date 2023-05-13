@@ -4,7 +4,8 @@ uses
   System.StartUpCopy,
   FMX.Forms,
   ufrmFaceRecognition in 'ufrmFaceRecognition.pas' {frmFaceRecognition},
-  FaceRecognitionFMX in '..\..\..\source\FaceRecognitionFMX.pas';
+  FaceRecognitionFMX in '..\..\..\source\FaceRecognitionFMX.pas',
+  TensorFlowLiteFMX in '..\..\..\source\TensorFlowLiteFMX.pas';
 
 {$R *.res}
 
