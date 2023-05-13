@@ -31,29 +31,29 @@ uses
 type
   TfrmFaceDetect = class(TForm)
     ImageMain: TImage;
-    Button1: TButton;
-    Button2: TButton;
+    btnOpenImage: TButton;
+    btnDetectFaces: TButton;
     OpenDialog: TOpenDialog;
     ImageList: TImageList;
-    ComboBox1: TComboBox;
+    cboProbability: TComboBox;
     Label1: TLabel;
-    ComboBox2: TComboBox;
+    cboThreadCount: TComboBox;
     Label2: TLabel;
-    ComboBox3: TComboBox;
+    cboInputSize: TComboBox;
     Label3: TLabel;
     Label4: TLabel;
     Label5: TLabel;
-    Edit1: TEdit;
+    edtBatchSize: TEdit;
     procedure FormCreate(Sender: TObject);
     procedure FormClose(Sender: TObject; var Action: TCloseAction);
-    procedure Button2Click(Sender: TObject);
-    procedure Button1Click(Sender: TObject);
-    procedure ComboBox2Change(Sender: TObject);
-    procedure ComboBox3Change(Sender: TObject);
+    procedure btnDetectFacesClick(Sender: TObject);
+    procedure btnOpenImageClick(Sender: TObject);
+    procedure cboThreadCountChange(Sender: TObject);
+    procedure cboInputSizeChange(Sender: TObject);
   private
     FFaceDetection: TTensorFlowLiteFMX;
   public
-    procedure LoadImage;
+    procedure LoadImage(inFilename: string);
     procedure ReloadModel;
   end;
 
@@ -106,12 +106,12 @@ var
   HideProbability: Boolean = False;
   BatchSize: Int32 = 1;
 
-procedure TfrmFaceDetect.LoadImage;
+procedure TfrmFaceDetect.LoadImage(inFilename: string);
 begin
   Label4.Text := '';
 
 {$IFDEF MSWINDOWS}
-  if not FileExists(OpenDialog.FileName) then
+  if not FileExists(inFilename) then
     Exit;
 
   if ImageMain.MultiResBitmap.Count > 0 then
@@ -170,10 +170,10 @@ begin
 {$ENDIF MSWINDOWS}
 end;
 
-procedure TfrmFaceDetect.Button1Click(Sender: TObject);
+procedure TfrmFaceDetect.btnOpenImageClick(Sender: TObject);
 begin
   if OpenDialog.Execute then
-    LoadImage;
+    LoadImage(OpenDialog.FileName);
 end;
 
 function GetFaceList(Probability: Float32; NMS: Integer; OutputData: POutputDataFaceDetection): TFaceList;
@@ -291,7 +291,7 @@ begin
   end;
 end;
 
-procedure TfrmFaceDetect.Button2Click(Sender: TObject);
+procedure TfrmFaceDetect.btnDetectFacesClick(Sender: TObject);
 var
   LBatch, i, X, Y, LPixel: DWORD;
   LColors: PAlphaColorArray;
@@ -303,9 +303,9 @@ var
   LRect: TRectF;
   LTickCountInference, LTickCountNMS: Int64;
 begin
-  BatchSize := StrToIntDef(Edit1.Text, 1);
+  BatchSize := StrToIntDef(edtBatchSize.Text, 1);
 
-  LoadImage;
+  LoadImage(OpenDialog.FileName);
 
   if ImageList.Source[1].MultiResBitmap.Count = 0 then
     Exit;
@@ -363,7 +363,7 @@ begin
 
           LTickCountNMS := TThread.GetTickCount64;
 
-          LFaceList := GetFaceList(StrToFloat(ComboBox1.Items[ComboBox1.ItemIndex]), 10, LOutputData);
+          LFaceList := GetFaceList(StrToFloat(cboProbability.Items[cboProbability.ItemIndex]), 10, LOutputData);
 
           if LBatch = BatchSize - 1 then
           begin
@@ -411,58 +411,58 @@ end;
 
 procedure TfrmFaceDetect.ReloadModel;
 begin
-  case ComboBox3.ItemIndex of
+  case cboInputSize.ItemIndex of
     0:
       begin
         FaceDetectionInputSize := 160;
         FaceDetectionOutputSize := 1575;
-        FFaceDetection.LoadModel(ModelsPath + 'face_detection_160.tflite', StrToInt(ComboBox2.Items[ComboBox2.ItemIndex]));
+        FFaceDetection.LoadModel(ModelsPath + 'face_detection_160.tflite', StrToInt(cboThreadCount.Items[cboThreadCount.ItemIndex]));
       end;
     1:
       begin
         FaceDetectionInputSize := 192;
         FaceDetectionOutputSize := 2268;
-        FFaceDetection.LoadModel(ModelsPath + 'face_detection_192.tflite', StrToInt(ComboBox2.Items[ComboBox2.ItemIndex]));
+        FFaceDetection.LoadModel(ModelsPath + 'face_detection_192.tflite', StrToInt(cboThreadCount.Items[cboThreadCount.ItemIndex]));
       end;
     2:
       begin
         FaceDetectionInputSize := 256;
         FaceDetectionOutputSize := 4032;
-        FFaceDetection.LoadModel(ModelsPath + 'face_detection_256.tflite', StrToInt(ComboBox2.Items[ComboBox2.ItemIndex]));
+        FFaceDetection.LoadModel(ModelsPath + 'face_detection_256.tflite', StrToInt(cboThreadCount.Items[cboThreadCount.ItemIndex]));
       end;
     3:
       begin
         FaceDetectionInputSize := 320;
         FaceDetectionOutputSize := 6300;
-        FFaceDetection.LoadModel(ModelsPath + 'face_detection_320.tflite', StrToInt(ComboBox2.Items[ComboBox2.ItemIndex]));
+        FFaceDetection.LoadModel(ModelsPath + 'face_detection_320.tflite', StrToInt(cboThreadCount.Items[cboThreadCount.ItemIndex]));
       end;
     4:
       begin
         FaceDetectionInputSize := 480;
         FaceDetectionOutputSize := 14175;
-        FFaceDetection.LoadModel(ModelsPath + 'face_detection_480.tflite', StrToInt(ComboBox2.Items[ComboBox2.ItemIndex]));
+        FFaceDetection.LoadModel(ModelsPath + 'face_detection_480.tflite', StrToInt(cboThreadCount.Items[cboThreadCount.ItemIndex]));
       end;
     5:
       begin
         FaceDetectionInputSize := 640;
         FaceDetectionOutputSize := 25200;
-        FFaceDetection.LoadModel(ModelsPath + 'face_detection_640.tflite', StrToInt(ComboBox2.Items[ComboBox2.ItemIndex]));
+        FFaceDetection.LoadModel(ModelsPath + 'face_detection_640.tflite', StrToInt(cboThreadCount.Items[cboThreadCount.ItemIndex]));
       end;
     6:
       begin
         FaceDetectionInputSize := 800;
         FaceDetectionOutputSize := 39375;
-        FFaceDetection.LoadModel(ModelsPath + 'face_detection_800.tflite', StrToInt(ComboBox2.Items[ComboBox2.ItemIndex]));
+        FFaceDetection.LoadModel(ModelsPath + 'face_detection_800.tflite', StrToInt(cboThreadCount.Items[cboThreadCount.ItemIndex]));
       end;
   end;
 end;
 
-procedure TfrmFaceDetect.ComboBox2Change(Sender: TObject);
+procedure TfrmFaceDetect.cboThreadCountChange(Sender: TObject);
 begin
   ReloadModel;
 end;
 
-procedure TfrmFaceDetect.ComboBox3Change(Sender: TObject);
+procedure TfrmFaceDetect.cboInputSizeChange(Sender: TObject);
 begin
   ReloadModel;
 end;

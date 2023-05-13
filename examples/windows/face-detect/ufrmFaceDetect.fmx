@@ -37,7 +37,7 @@ object frmFaceDetect: TfrmFaceDetect
       TabOrder = 0
     end
   end
-  object Button1: TButton
+  object btnOpenImage: TButton
     Anchors = [akLeft, akBottom]
     Position.X = 18.000000000000000000
     Position.Y = 655.000000000000000000
@@ -46,9 +46,9 @@ object frmFaceDetect: TfrmFaceDetect
     Size.PlatformDefault = False
     TabOrder = 1
     Text = 'Open Image'
-    OnClick = Button1Click
+    OnClick = btnOpenImageClick
   end
-  object Button2: TButton
+  object btnDetectFaces: TButton
     Anchors = [akLeft, akBottom]
     Position.X = 117.000000000000000000
     Position.Y = 655.000000000000000000
@@ -57,13 +57,13 @@ object frmFaceDetect: TfrmFaceDetect
     Size.PlatformDefault = False
     TabOrder = 3
     Text = 'Detect'
-    OnClick = Button2Click
+    OnClick = btnDetectFacesClick
   end
   object OpenDialog: TOpenDialog
     Left = 139
     Top = 230
   end
-  object ComboBox1: TComboBox
+  object cboProbability: TComboBox
     DropDownCount = 18
     Items.Strings = (
       '0.1'
@@ -92,7 +92,7 @@ object frmFaceDetect: TfrmFaceDetect
     Text = 'Probability'
     TabOrder = 7
   end
-  object ComboBox2: TComboBox
+  object cboThreadCount: TComboBox
     Items.Strings = (
       '2'
       '4'
@@ -104,7 +104,7 @@ object frmFaceDetect: TfrmFaceDetect
     Size.Height = 22.000000000000000000
     Size.PlatformDefault = False
     TabOrder = 8
-    OnChange = ComboBox2Change
+    OnChange = cboThreadCountChange
   end
   object Label2: TLabel
     Position.X = 12.000000000000000000
@@ -115,7 +115,7 @@ object frmFaceDetect: TfrmFaceDetect
     Text = 'Thread Count'
     TabOrder = 9
   end
-  object ComboBox3: TComboBox
+  object cboInputSize: TComboBox
     Items.Strings = (
       '160'
       '192'
@@ -131,7 +131,7 @@ object frmFaceDetect: TfrmFaceDetect
     Size.Height = 22.000000000000000000
     Size.PlatformDefault = False
     TabOrder = 12
-    OnChange = ComboBox3Change
+    OnChange = cboInputSizeChange
   end
   object Label3: TLabel
     Position.X = 298.000000000000000000
@@ -151,7 +151,7 @@ object frmFaceDetect: TfrmFaceDetect
     Text = 'Batch Size'
     TabOrder = 16
   end
-  object Edit1: TEdit
+  object edtBatchSize: TEdit
     Touch.InteractiveGestures = [LongTap, DoubleTap]
     TabOrder = 17
     Text = '1'
