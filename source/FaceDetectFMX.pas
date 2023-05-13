@@ -17,14 +17,10 @@ uses
   FMX.Forms,
   FMX.Graphics,
   FMX.Dialogs,
-  FMX.Controls.Presentation,
   FMX.StdCtrls,
   FMX.Objects,
   FMX.Utils,
-  System.ImageList,
   FMX.ImgList,
-  FMX.ListBox,
-  FMX.Edit,
   TensorFlowLiteFMX
   ;
 
@@ -76,13 +72,13 @@ type
     OnCompletion : TFaceDetectStatus;
     OnFoundFaces : TFoundFaces;
     ThreadCount : Integer;
-    BatchSize: Int32;
-    FaceDetectionInputSize: Int32;
-    FaceDetectionOutputSize: Int32;
+    BatchSize: UInt32;
+    FaceDetectionInputSize: UInt32;
+    FaceDetectionOutputSize: UInt32;
     procedure LoadImage(ImageMain: TImage; inFilename: string);
     procedure DetectFaces(Probability: Float32; ImageMain: TImage; inFilename: string);
     function LoadModel(ModelPath: String; InterpreterThreadCount: Integer): TFLiteStatus;
-    function GetFaceList(Probability: Float32; NMS: Integer; OutputData: POutputDataFaceDetection): TFaceList;
+    function GetFaceList(Probability: Float32; NMS: UInt32; OutputData: POutputDataFaceDetection): TFaceList;
     constructor Create(AOwner: TComponent); override;
     destructor Destroy; override;
   end;
@@ -198,7 +194,7 @@ begin
 end;
 
 
-function TFaceDetect.GetFaceList(Probability: Float32; NMS: Integer; OutputData: POutputDataFaceDetection): TFaceList;
+function TFaceDetect.GetFaceList(Probability: Float32; NMS: UInt32; OutputData: POutputDataFaceDetection): TFaceList;
 var
   i, X, Y: DWORD;
   LListNMS: array of TFace;

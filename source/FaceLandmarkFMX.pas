@@ -180,7 +180,7 @@ end;
 
 destructor TFaceLandmarkFMX.Destroy;
 begin
-  FFaceLandmark.Destroy;
+  FreeAndNil(FFaceLandmark);
 
   inherited Destroy;
 end;
