@@ -4,11 +4,29 @@ interface
 
 uses
 {$IFDEF MSWINDOWS}
-  WinApi.Windows, Vcl.Graphics,
-{$ENDIF}System.SysUtils, System.Types, System.UITypes, System.Classes, System.Variants,
-  FMX.Types, FMX.Controls, FMX.Forms, FMX.Graphics, FMX.Dialogs,
-  FMX.Controls.Presentation, FMX.StdCtrls, FMX.Objects, FMX.Utils,
-  System.ImageList, FMX.ImgList, FMX.ListBox, FMX.Edit;
+  WinApi.Windows,
+  Vcl.Graphics,
+{$ENDIF}
+  System.SysUtils,
+  System.Types,
+  System.UITypes,
+  System.Classes,
+  System.Variants,
+  FMX.Types,
+  FMX.Controls,
+  FMX.Forms,
+  FMX.Graphics,
+  FMX.Dialogs,
+  FMX.Controls.Presentation,
+  FMX.StdCtrls,
+  FMX.Objects,
+  FMX.Utils,
+  System.ImageList,
+  FMX.ImgList,
+  FMX.ListBox,
+  FMX.Edit,
+  TensorFlowLiteFMX
+  ;
 
 type
   TfrmFaceDetect = class(TForm)
@@ -33,7 +51,7 @@ type
     procedure ComboBox2Change(Sender: TObject);
     procedure ComboBox3Change(Sender: TObject);
   private
-
+    FFaceDetection: TTensorFlowLiteFMX;
   public
     procedure LoadImage;
     procedure ReloadModel;
@@ -46,14 +64,9 @@ implementation
 
 {$R *.fmx}
 
-
-uses TensorFlowLiteFMX;
-
 const
   ModelsPath = '..\..\..\..\..\models\';
 
-var
-  FaceDetection: TTensorFlowLiteFMX;
 
   // AMD Ryzen 5 3500X, Windows 10, 8 threads, CPU
 var
@@ -166,14 +179,14 @@ end;
 function GetFaceList(Probability: Float32; NMS: Integer; OutputData: POutputDataFaceDetection): TFaceList;
 var
   i, X, Y: DWORD;
-  FListNMS: array of TFace;
-  FRect: TRectF;
-  FExist: Boolean;
+  LListNMS: array of TFace;
+  LRect: TRectF;
+  LExist: Boolean;
 begin
   SetLength(Result.Faces, 0);
   Result.Count := 0;
 
-  SetLength(FListNMS, 0);
+  SetLength(LListNMS, 0);
 
   Y := 0;
 
@@ -184,40 +197,40 @@ begin
 
     if (OutputData[Y][4] >= Probability) and (OutputData[Y][4] <= 1.0) then
     begin
-      SetLength(FListNMS, Length(FListNMS) + 1);
-      FListNMS[Length(FListNMS) - 1].Rect.Left := ((FaceDetectionInputSize * OutputData[Y][0]) - ((FaceDetectionInputSize * OutputData[Y][2]) / 2));
-      FListNMS[Length(FListNMS) - 1].Rect.Top := ((FaceDetectionInputSize * OutputData[Y][1]) - ((FaceDetectionInputSize * OutputData[Y][3]) / 2));
-      FListNMS[Length(FListNMS) - 1].Rect.Width := (FaceDetectionInputSize * OutputData[Y][2]);
-      FListNMS[Length(FListNMS) - 1].Rect.Height := (FaceDetectionInputSize * OutputData[Y][3]);
-      FListNMS[Length(FListNMS) - 1].Probability := OutputData[Y][4];
+      SetLength(LListNMS, Length(LListNMS) + 1);
+      LListNMS[Length(LListNMS) - 1].Rect.Left := ((FaceDetectionInputSize * OutputData[Y][0]) - ((FaceDetectionInputSize * OutputData[Y][2]) / 2));
+      LListNMS[Length(LListNMS) - 1].Rect.Top := ((FaceDetectionInputSize * OutputData[Y][1]) - ((FaceDetectionInputSize * OutputData[Y][3]) / 2));
+      LListNMS[Length(LListNMS) - 1].Rect.Width := (FaceDetectionInputSize * OutputData[Y][2]);
+      LListNMS[Length(LListNMS) - 1].Rect.Height := (FaceDetectionInputSize * OutputData[Y][3]);
+      LListNMS[Length(LListNMS) - 1].Probability := OutputData[Y][4];
 
-      if Length(FListNMS) > 0 then
+      if Length(LListNMS) > 0 then
       begin
         for i := Y - NMS to Y + NMS - 1 do
         begin
           if (OutputData[i][4] > OutputData[Y][4]) then
           begin
-            FRect.Left := ((FaceDetectionInputSize * OutputData[i][0]) - ((FaceDetectionInputSize * OutputData[i][2]) / 2));
-            FRect.Top := ((FaceDetectionInputSize * OutputData[i][1]) - ((FaceDetectionInputSize * OutputData[i][3]) / 2));
-            FRect.Width := (FaceDetectionInputSize * OutputData[i][2]);
-            FRect.Height := (FaceDetectionInputSize * OutputData[i][3]);
+            LRect.Left := ((FaceDetectionInputSize * OutputData[i][0]) - ((FaceDetectionInputSize * OutputData[i][2]) / 2));
+            LRect.Top := ((FaceDetectionInputSize * OutputData[i][1]) - ((FaceDetectionInputSize * OutputData[i][3]) / 2));
+            LRect.Width := (FaceDetectionInputSize * OutputData[i][2]);
+            LRect.Height := (FaceDetectionInputSize * OutputData[i][3]);
 
-            for X := 0 to Length(FListNMS) - 1 do
+            for X := 0 to Length(LListNMS) - 1 do
             begin
-              if IntersectRect(FListNMS[X].Rect, FRect) then
+              if IntersectRect(LListNMS[X].Rect, LRect) then
               begin
-                if (FaceDetectionInputSize * OutputData[i][0] > FListNMS[X].Rect.Left) and
-                  (FaceDetectionInputSize * OutputData[i][0] < FListNMS[X].Rect.Right) and
-                  (FaceDetectionInputSize * OutputData[i][1] > FListNMS[X].Rect.Top) and
-                  (FaceDetectionInputSize * OutputData[i][1] < FListNMS[X].Rect.Bottom) and
-                  (OutputData[i][4] > FListNMS[X].Probability)
+                if (FaceDetectionInputSize * OutputData[i][0] > LListNMS[X].Rect.Left) and
+                  (FaceDetectionInputSize * OutputData[i][0] < LListNMS[X].Rect.Right) and
+                  (FaceDetectionInputSize * OutputData[i][1] > LListNMS[X].Rect.Top) and
+                  (FaceDetectionInputSize * OutputData[i][1] < LListNMS[X].Rect.Bottom) and
+                  (OutputData[i][4] > LListNMS[X].Probability)
                 then
                 begin
-                  FListNMS[X].Rect.Left := FRect.Left;
-                  FListNMS[X].Rect.Top := FRect.Top;
-                  FListNMS[X].Rect.Width := FRect.Width;
-                  FListNMS[X].Rect.Height := FRect.Height;
-                  FListNMS[X].Probability := OutputData[i][4];
+                  LListNMS[X].Rect.Left := LRect.Left;
+                  LListNMS[X].Rect.Top := LRect.Top;
+                  LListNMS[X].Rect.Width := LRect.Width;
+                  LListNMS[X].Rect.Height := LRect.Height;
+                  LListNMS[X].Probability := OutputData[i][4];
                 end;
               end;
             end;
@@ -229,48 +242,48 @@ begin
     Inc(Y);
   end;
 
-  if Length(FListNMS) > 0 then
+  if Length(LListNMS) > 0 then
   begin
-    for Y := 0 to Length(FListNMS) - 1 do
+    for Y := 0 to Length(LListNMS) - 1 do
     begin
-      FExist := False;
+      LExist := False;
 
       if (Length(Result.Faces) > 0) then
       begin
         for i := 0 to Length(Result.Faces) - 1 do
         begin
 
-          if (IntersectRect(Result.Faces[i].Rect, FListNMS[Y].Rect)) then
+          if (IntersectRect(Result.Faces[i].Rect, LListNMS[Y].Rect)) then
           begin
-            if ((Abs(Result.Faces[i].Rect.Top - FListNMS[Y].Rect.Top) < Result.Faces[i].Rect.Height / 2)) and
-              ((Abs(Result.Faces[i].Rect.Bottom - FListNMS[Y].Rect.Bottom) < Result.Faces[i].Rect.Height / 2)) and
-              ((Abs(Result.Faces[i].Rect.Left - FListNMS[Y].Rect.Left) < Result.Faces[i].Rect.Width / 2)) and
-              ((Abs(Result.Faces[i].Rect.Right - FListNMS[Y].Rect.Right) < Result.Faces[i].Rect.Width / 2)) then
+            if ((Abs(Result.Faces[i].Rect.Top - LListNMS[Y].Rect.Top) < Result.Faces[i].Rect.Height / 2)) and
+              ((Abs(Result.Faces[i].Rect.Bottom - LListNMS[Y].Rect.Bottom) < Result.Faces[i].Rect.Height / 2)) and
+              ((Abs(Result.Faces[i].Rect.Left - LListNMS[Y].Rect.Left) < Result.Faces[i].Rect.Width / 2)) and
+              ((Abs(Result.Faces[i].Rect.Right - LListNMS[Y].Rect.Right) < Result.Faces[i].Rect.Width / 2)) then
             begin
-              if FListNMS[Y].Probability > Result.Faces[i].Probability then
+              if LListNMS[Y].Probability > Result.Faces[i].Probability then
               begin
-                Result.Faces[i].Probability := FListNMS[Y].Probability;
-                Result.Faces[i].Rect.Left := FListNMS[Y].Rect.Left;
-                Result.Faces[i].Rect.Top := FListNMS[Y].Rect.Top;
-                Result.Faces[i].Rect.Right := FListNMS[Y].Rect.Right;
-                Result.Faces[i].Rect.Bottom := FListNMS[Y].Rect.Bottom;
+                Result.Faces[i].Probability := LListNMS[Y].Probability;
+                Result.Faces[i].Rect.Left := LListNMS[Y].Rect.Left;
+                Result.Faces[i].Rect.Top := LListNMS[Y].Rect.Top;
+                Result.Faces[i].Rect.Right := LListNMS[Y].Rect.Right;
+                Result.Faces[i].Rect.Bottom := LListNMS[Y].Rect.Bottom;
               end;
 
-              FExist := True;
+              LExist := True;
               Break;
             end;
           end;
         end;
       end;
 
-      if (FExist = False) then
+      if (LExist = False) then
       begin
         SetLength(Result.Faces, Length(Result.Faces) + 1);
-        Result.Faces[Length(Result.Faces) - 1].Rect.Left := FListNMS[Y].Rect.Left;
-        Result.Faces[Length(Result.Faces) - 1].Rect.Top := FListNMS[Y].Rect.Top;
-        Result.Faces[Length(Result.Faces) - 1].Rect.Width := FListNMS[Y].Rect.Width;
-        Result.Faces[Length(Result.Faces) - 1].Rect.Height := FListNMS[Y].Rect.Height;
-        Result.Faces[Length(Result.Faces) - 1].Probability := FListNMS[Y].Probability;
+        Result.Faces[Length(Result.Faces) - 1].Rect.Left := LListNMS[Y].Rect.Left;
+        Result.Faces[Length(Result.Faces) - 1].Rect.Top := LListNMS[Y].Rect.Top;
+        Result.Faces[Length(Result.Faces) - 1].Rect.Width := LListNMS[Y].Rect.Width;
+        Result.Faces[Length(Result.Faces) - 1].Rect.Height := LListNMS[Y].Rect.Height;
+        Result.Faces[Length(Result.Faces) - 1].Probability := LListNMS[Y].Probability;
 
         Result.Count := Length(Result.Faces);
       end;
@@ -280,15 +293,15 @@ end;
 
 procedure TfrmFaceDetect.Button2Click(Sender: TObject);
 var
-  FBatch, i, X, Y, FPixel: DWORD;
-  FColors: PAlphaColorArray;
-  FBitmapData: TBitmapData;
-  FInputData: PInputDataFaceDetection;
-  FOutputData: POutputDataFaceDetection;
-  FStatus: TFLiteStatus;
-  FFaceList: TFaceList;
-  FRect: TRectF;
-  FTickCountInference, FTickCountNMS: Int64;
+  LBatch, i, X, Y, LPixel: DWORD;
+  LColors: PAlphaColorArray;
+  LBitmapData: TBitmapData;
+  LInputData: PInputDataFaceDetection;
+  LOutputData: POutputDataFaceDetection;
+  LStatus: TFLiteStatus;
+  LFaceList: TFaceList;
+  LRect: TRectF;
+  LTickCountInference, LTickCountNMS: Int64;
 begin
   BatchSize := StrToIntDef(Edit1.Text, 1);
 
@@ -297,86 +310,86 @@ begin
   if ImageList.Source[1].MultiResBitmap.Count = 0 then
     Exit;
 
-  if (ImageList.Source[1].MultiResBitmap[0].Bitmap.Map(TMapAccess.ReadWrite, FBitmapData)) then
+  if (ImageList.Source[1].MultiResBitmap[0].Bitmap.Map(TMapAccess.ReadWrite, LBitmapData)) then
   begin
     try
-      FTickCountInference := TThread.GetTickCount64;
+      LTickCountInference := TThread.GetTickCount64;
 
-      for FBatch := 0 to BatchSize - 1 do
+      for LBatch := 0 to BatchSize - 1 do
       begin
-        GetMem(FInputData, FaceDetection.Input.Tensors[0].DataSize);
+        GetMem(LInputData, FFaceDetection.Input.Tensors[0].DataSize);
         try
-          FPixel := 0;
+          LPixel := 0;
 
           for Y := 0 to FaceDetectionInputSize - 1 do
           begin
-            FColors := PAlphaColorArray(FBitmapData.GetScanline(Y));
+            LColors := PAlphaColorArray(LBitmapData.GetScanline(Y));
 
             for X := 0 to FaceDetectionInputSize - 1 do
             begin
-              FInputData[FPixel][0] := (TAlphaColorRec(FColors[X]).R / 255);
-              FInputData[FPixel][1] := (TAlphaColorRec(FColors[X]).G / 255);
-              FInputData[FPixel][2] := (TAlphaColorRec(FColors[X]).B / 255);
+              LInputData[LPixel][0] := (TAlphaColorRec(LColors[X]).R / 255);
+              LInputData[LPixel][1] := (TAlphaColorRec(LColors[X]).G / 255);
+              LInputData[LPixel][2] := (TAlphaColorRec(LColors[X]).B / 255);
 
-              Inc(FPixel);
+              Inc(LPixel);
             end;
           end;
 
-          FStatus := FaceDetection.SetInputData(0, FInputData, FaceDetection.Input.Tensors[0].DataSize);
+          LStatus := FFaceDetection.SetInputData(0, LInputData, FFaceDetection.Input.Tensors[0].DataSize);
         finally
-          FreeMem(FInputData);
+          FreeMem(LInputData);
         end;
 
-        if FStatus <> TFLiteOk then
+        if LStatus <> TFLiteOk then
         begin
           ShowMessage('SetInputData Error');
           Exit;
         end;
 
-        FStatus := FaceDetection.Inference;
+        LStatus := FFaceDetection.Inference;
 
-        if FStatus <> TFLiteOk then
+        if LStatus <> TFLiteOk then
         begin
           ShowMessage('Inference Error');
           Exit;
         end;
 
-        GetMem(FOutputData, FaceDetection.Output.Tensors[0].DataSize);
+        GetMem(LOutputData, FFaceDetection.Output.Tensors[0].DataSize);
         try
-          FStatus := FaceDetection.GetOutputData(0, FOutputData, FaceDetection.Output.Tensors[0].DataSize);
+          LStatus := FFaceDetection.GetOutputData(0, LOutputData, FFaceDetection.Output.Tensors[0].DataSize);
 
-          if FStatus <> TFLiteOk then
+          if LStatus <> TFLiteOk then
             Exit;
 
-          FTickCountNMS := TThread.GetTickCount64;
+          LTickCountNMS := TThread.GetTickCount64;
 
-          FFaceList := GetFaceList(StrToFloat(ComboBox1.Items[ComboBox1.ItemIndex]), 10, FOutputData);
+          LFaceList := GetFaceList(StrToFloat(ComboBox1.Items[ComboBox1.ItemIndex]), 10, LOutputData);
 
-          if FBatch = BatchSize - 1 then
+          if LBatch = BatchSize - 1 then
           begin
             ImageMain.Bitmap.Canvas.BeginScene;
             try
-              FRect.Width := Screen.Width;
-              FRect.Height := Screen.Height;
+              LRect.Width := Screen.Width;
+              LRect.Height := Screen.Height;
 
-              if FFaceList.Count > 0 then
+              if LFaceList.Count > 0 then
               begin
-                Label4.Text := 'detect time: ' + FloatToStr((TThread.GetTickCount64 - FTickCountInference) / 1000 / BatchSize) + ', nms time: ' + FloatToStr((TThread.GetTickCount64 - FTickCountNMS) / 1000) + ', face count: ' + IntToStr(FFaceList.Count);
+                Label4.Text := 'detect time: ' + FloatToStr((TThread.GetTickCount64 - LTickCountInference) / 1000 / BatchSize) + ', nms time: ' + FloatToStr((TThread.GetTickCount64 - LTickCountNMS) / 1000) + ', face count: ' + IntToStr(LFaceList.Count);
 
                 ImageMain.Bitmap.Canvas.Font.Size := 11;
-                ImageMain.Bitmap.Canvas.MeasureText(FRect, '0,00', False, [], TTextAlign.Leading, TTextAlign.Leading);
+                ImageMain.Bitmap.Canvas.MeasureText(LRect, '0,00', False, [], TTextAlign.Leading, TTextAlign.Leading);
                 ImageMain.Bitmap.Canvas.Stroke.Color := TAlphaColorRec.Orangered;
                 ImageMain.Bitmap.Canvas.Stroke.Thickness := 1.5;
 
-                for i := 0 to FFaceList.Count - 1 do
+                for i := 0 to LFaceList.Count - 1 do
                 begin
-                  ImageMain.Bitmap.Canvas.DrawRect(FFaceList.Faces[i].Rect, 0, 0, AllCorners, 1);
+                  ImageMain.Bitmap.Canvas.DrawRect(LFaceList.Faces[i].Rect, 0, 0, AllCorners, 1);
 
                   ImageMain.Bitmap.Canvas.Fill.Color := TAlphaColorRec.White;
                   if not HideProbability then
                     ImageMain.Bitmap.Canvas.FillText(
-                      RectF(FFaceList.Faces[i].Rect.Left, FFaceList.Faces[i].Rect.Top - FRect.Height, FFaceList.Faces[i].Rect.Right + FRect.Width, FFaceList.Faces[i].Rect.Bottom),
-                      Copy(FloatToStr(FFaceList.Faces[i].Probability), 1, 4),
+                      RectF(LFaceList.Faces[i].Rect.Left, LFaceList.Faces[i].Rect.Top - LRect.Height, LFaceList.Faces[i].Rect.Right + LRect.Width, LFaceList.Faces[i].Rect.Bottom),
+                      Copy(FloatToStr(LFaceList.Faces[i].Probability), 1, 4),
                       False, 1, [], TTextAlign.Leading, TTextAlign.Leading);
                 end;
               end;
@@ -386,12 +399,12 @@ begin
           end;
 
         finally
-          FreeMem(FOutputData);
+          FreeMem(LOutputData);
         end;
 
       end;
     finally
-      ImageList.Source[1].MultiResBitmap[0].Bitmap.Unmap(FBitmapData);
+      ImageList.Source[1].MultiResBitmap[0].Bitmap.Unmap(LBitmapData);
     end;
   end;
 end;
@@ -403,43 +416,43 @@ begin
       begin
         FaceDetectionInputSize := 160;
         FaceDetectionOutputSize := 1575;
-        FaceDetection.LoadModel(ModelsPath + 'face_detection_160.tflite', StrToInt(ComboBox2.Items[ComboBox2.ItemIndex]));
+        FFaceDetection.LoadModel(ModelsPath + 'face_detection_160.tflite', StrToInt(ComboBox2.Items[ComboBox2.ItemIndex]));
       end;
     1:
       begin
         FaceDetectionInputSize := 192;
         FaceDetectionOutputSize := 2268;
-        FaceDetection.LoadModel(ModelsPath + 'face_detection_192.tflite', StrToInt(ComboBox2.Items[ComboBox2.ItemIndex]));
+        FFaceDetection.LoadModel(ModelsPath + 'face_detection_192.tflite', StrToInt(ComboBox2.Items[ComboBox2.ItemIndex]));
       end;
     2:
       begin
         FaceDetectionInputSize := 256;
         FaceDetectionOutputSize := 4032;
-        FaceDetection.LoadModel(ModelsPath + 'face_detection_256.tflite', StrToInt(ComboBox2.Items[ComboBox2.ItemIndex]));
+        FFaceDetection.LoadModel(ModelsPath + 'face_detection_256.tflite', StrToInt(ComboBox2.Items[ComboBox2.ItemIndex]));
       end;
     3:
       begin
         FaceDetectionInputSize := 320;
         FaceDetectionOutputSize := 6300;
-        FaceDetection.LoadModel(ModelsPath + 'face_detection_320.tflite', StrToInt(ComboBox2.Items[ComboBox2.ItemIndex]));
+        FFaceDetection.LoadModel(ModelsPath + 'face_detection_320.tflite', StrToInt(ComboBox2.Items[ComboBox2.ItemIndex]));
       end;
     4:
       begin
         FaceDetectionInputSize := 480;
         FaceDetectionOutputSize := 14175;
-        FaceDetection.LoadModel(ModelsPath + 'face_detection_480.tflite', StrToInt(ComboBox2.Items[ComboBox2.ItemIndex]));
+        FFaceDetection.LoadModel(ModelsPath + 'face_detection_480.tflite', StrToInt(ComboBox2.Items[ComboBox2.ItemIndex]));
       end;
     5:
       begin
         FaceDetectionInputSize := 640;
         FaceDetectionOutputSize := 25200;
-        FaceDetection.LoadModel(ModelsPath + 'face_detection_640.tflite', StrToInt(ComboBox2.Items[ComboBox2.ItemIndex]));
+        FFaceDetection.LoadModel(ModelsPath + 'face_detection_640.tflite', StrToInt(ComboBox2.Items[ComboBox2.ItemIndex]));
       end;
     6:
       begin
         FaceDetectionInputSize := 800;
         FaceDetectionOutputSize := 39375;
-        FaceDetection.LoadModel(ModelsPath + 'face_detection_800.tflite', StrToInt(ComboBox2.Items[ComboBox2.ItemIndex]));
+        FFaceDetection.LoadModel(ModelsPath + 'face_detection_800.tflite', StrToInt(ComboBox2.Items[ComboBox2.ItemIndex]));
       end;
   end;
 end;
@@ -459,17 +472,17 @@ begin
 {$IFDEF MSWINDOWS}
   SetPriorityClass(GetCurrentProcess, HIGH_PRIORITY_CLASS);
 
-  FaceDetection := TTensorFlowLiteFMX.Create(Self);
+  FFaceDetection := TTensorFlowLiteFMX.Create(Self);
 
   // Currently Tensor Flow Lite for Windows supports only x64 CPU, GPU is not supported
 
-  FaceDetection.LoadModel(ModelsPath + 'face_detection_640.tflite', 8);
+  FFaceDetection.LoadModel(ModelsPath + 'face_detection_640.tflite', 8);
 {$ENDIF}
 end;
 
 procedure TfrmFaceDetect.FormClose(Sender: TObject; var Action: TCloseAction);
 begin
-  FaceDetection.Destroy;
+  FFaceDetection.Destroy;
 end;
 
 end.
