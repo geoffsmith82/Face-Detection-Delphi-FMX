@@ -30,7 +30,8 @@ uses
   FMX.Filter.Effects,
   FMX.Edit,
   FMX.ComboEdit,
-  FMX.Memo.Types
+  FMX.Memo.Types,
+  TensorFlowLiteFMX
   ;
 
 const
@@ -51,17 +52,19 @@ type
     ImageList: TImageList;
     ImageA: TImage;
     ImageB: TImage;
-    Button1: TButton;
-    Button2: TButton;
-    Button3: TButton;
+    btnOpenFileImageA: TButton;
+    btnOpenFileImageB: TButton;
+    btnCompareAandBImage: TButton;
     Memo1: TMemo;
     Memo2: TMemo;
-    Label1: TLabel;
+    lblDetectionInfo: TLabel;
     procedure FormCreate(Sender: TObject);
-    procedure Button1Click(Sender: TObject);
-    procedure Button3Click(Sender: TObject);
-    procedure Button2Click(Sender: TObject);
+    procedure btnOpenFileImageAClick(Sender: TObject);
+    procedure btnCompareAandBImageClick(Sender: TObject);
+    procedure btnOpenFileImageBClick(Sender: TObject);
+    procedure FormDestroy(Sender: TObject);
   private
+    FFaceNet: TTensorFlowLiteFMX;
     function CreateFaceEmbedding(inFaceImage: TImage; var outFaceEmbedding: TOutputDataFaceNet): Boolean;
     { Private declarations }
   public
@@ -75,14 +78,8 @@ implementation
 
 {$R *.fmx}
 
-
-uses TensorFlowLiteFMX;
-
 const
   ModelsPath = '..\..\..\..\..\models\';
-
-var
-  FaceNet: TTensorFlowLiteFMX;
 
 procedure TfrmFaceRecognition.LoadImage(FileName: String; var Image: TImage);
 begin
@@ -158,7 +155,7 @@ begin
   // ImageA
   if (inFaceImage.Bitmap.Map(TMapAccess.ReadWrite, LBitmapData)) then
   begin
-    GetMem(LInputData, FaceNet.Input.Tensors[0].DataSize);
+    GetMem(LInputData, FFaceNet.Input.Tensors[0].DataSize);
     try
       for Y := 0 to FaceNetInputSize - 1 do
       begin
@@ -170,17 +167,17 @@ begin
           LInputData[Y][X][2] := (TAlphaColorRec(LColors[X]).B / 255);
         end;
       end;
-      FaceNet.SetInputData(0, LInputData, FaceNet.Input.Tensors[0].DataSize);
+      FFaceNet.SetInputData(0, LInputData, FFaceNet.Input.Tensors[0].DataSize);
     finally
       FreeMem(LInputData);
     end;
-    FaceNet.Inference;
-    FaceNet.GetOutputData(0, @outFaceEmbedding, FaceNet.Output.Tensors[0].DataSize);
+    FFaceNet.Inference;
+    FFaceNet.GetOutputData(0, @outFaceEmbedding, FFaceNet.Output.Tensors[0].DataSize);
     Result := True;
   end;
 end;
 
-procedure TfrmFaceRecognition.Button1Click(Sender: TObject);
+procedure TfrmFaceRecognition.btnOpenFileImageAClick(Sender: TObject);
 begin
 {$IFDEF MSWINDOWS}
   OpenDialog.Execute;
@@ -189,7 +186,7 @@ begin
 {$ENDIF MSWINDOWS}
 end;
 
-procedure TfrmFaceRecognition.Button2Click(Sender: TObject);
+procedure TfrmFaceRecognition.btnOpenFileImageBClick(Sender: TObject);
 begin
 {$IFDEF MSWINDOWS}
   OpenDialog.Execute;
@@ -198,25 +195,25 @@ begin
 {$ENDIF MSWINDOWS}
 end;
 
-procedure TfrmFaceRecognition.Button3Click(Sender: TObject);
+procedure TfrmFaceRecognition.btnCompareAandBImageClick(Sender: TObject);
 var
   i, X, Y: DWORD;
   LFaceEmbeddingA, LFaceEmbeddingB: TOutputDataFaceNet;
-  FEmbedded: Float32;
+  LEmbedded: Float32;
 begin
-  FEmbedded := 0;
+  LEmbedded := 0;
   CreateFaceEmbedding(ImageA, LFaceEmbeddingA);
   CreateFaceEmbedding(ImageB, LFaceEmbeddingB);
 
     for i := 0 to FaceNetOutputSize - 1 do
       LFaceEmbeddingB[i] := (LFaceEmbeddingB[i]) - (LFaceEmbeddingA[i]);
 
-    FEmbedded := System.Math.Norm(LFaceEmbeddingB);
+    LEmbedded := System.Math.Norm(LFaceEmbeddingB);
 
-    if FEmbedded < 0.41 then
-      Label1.Text := 'Same Person: TRUE, Distance: ' + FloatToStr(FEmbedded)
+    if LEmbedded < 0.41 then
+      lblDetectionInfo.Text := 'Same Person: TRUE, Distance: ' + FloatToStr(LEmbedded)
     else
-      Label1.Text := 'Same Person: FALSE, Distance: ' + FloatToStr(FEmbedded);
+      lblDetectionInfo.Text := 'Same Person: FALSE, Distance: ' + FloatToStr(LEmbedded);
 end;
 
 procedure TfrmFaceRecognition.FormCreate(Sender: TObject);
@@ -224,13 +221,18 @@ begin
 {$IFDEF MSWINDOWS}
   SetPriorityClass(GetCurrentProcess, HIGH_PRIORITY_CLASS);
 
-  FaceNet := TTensorFlowLiteFMX.Create(Self);
+  FFaceNet := TTensorFlowLiteFMX.Create(Self);
 
   // Currently Tensor Flow Lite for Windows supports only x64 CPU, GPU is not supported
 
-  FaceNet.LoadModel(ModelsPath + 'face_recognition.tflite', 8);
+  FFaceNet.LoadModel(ModelsPath + 'face_recognition.tflite', 8);
 
 {$ENDIF}
+end;
+
+procedure TfrmFaceRecognition.FormDestroy(Sender: TObject);
+begin
+  FreeAndNil(FFaceNet);
 end;
 
 end.

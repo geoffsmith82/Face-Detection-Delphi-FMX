@@ -119,13 +119,13 @@ begin
 
   ImageMain.MultiResBitmap.Add;
 
-  if FileExists(OpenDialog.FileName) then
+  if FileExists(inFilename) then
   begin
     if ImageList.Source[0].MultiResBitmap.Count > 0 then
       ImageList.Source[0].MultiResBitmap[0].Free;
 
     ImageList.Source[0].MultiResBitmap.Add;
-    ImageList.Source[0].MultiResBitmap[0].Bitmap.LoadFromFile(OpenDialog.FileName);
+    ImageList.Source[0].MultiResBitmap[0].Bitmap.LoadFromFile(inFilename);
   end;
 
   if ImageList.Source[1].MultiResBitmap.Count > 0 then

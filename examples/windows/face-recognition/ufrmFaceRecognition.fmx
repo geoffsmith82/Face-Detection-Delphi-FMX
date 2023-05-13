@@ -9,6 +9,7 @@ object frmFaceRecognition: TfrmFaceRecognition
   FormFactor.Height = 480
   FormFactor.Devices = [Desktop]
   OnCreate = FormCreate
+  OnDestroy = FormDestroy
   DesignerMasterStyle = 0
   object OpenDialog: TOpenDialog
     Left = 171
@@ -38,26 +39,26 @@ object frmFaceRecognition: TfrmFaceRecognition
     Size.Height = 160.000000000000000000
     Size.PlatformDefault = False
   end
-  object Button1: TButton
+  object btnOpenFileImageA: TButton
     Position.X = 62.000000000000000000
     Position.Y = 249.000000000000000000
     TabOrder = 5
     Text = 'Open File'
-    OnClick = Button1Click
+    OnClick = btnOpenFileImageAClick
   end
-  object Button2: TButton
+  object btnOpenFileImageB: TButton
     Position.X = 244.000000000000000000
     Position.Y = 249.000000000000000000
     TabOrder = 6
     Text = 'Open File'
-    OnClick = Button2Click
+    OnClick = btnOpenFileImageBClick
   end
-  object Button3: TButton
+  object btnCompareAandBImage: TButton
     Position.X = 155.000000000000000000
     Position.Y = 293.000000000000000000
     TabOrder = 7
     Text = 'Compare'
-    OnClick = Button3Click
+    OnClick = btnCompareAandBImageClick
   end
   object Memo1: TMemo
     Touch.InteractiveGestures = [Pan, LongTap, DoubleTap]
@@ -87,7 +88,7 @@ object frmFaceRecognition: TfrmFaceRecognition
     Viewport.Width = 156.000000000000000000
     Viewport.Height = 46.000000000000000000
   end
-  object Label1: TLabel
+  object lblDetectionInfo: TLabel
     Position.X = 22.000000000000000000
     Position.Y = 32.000000000000000000
     Size.Width = 294.000000000000000000
