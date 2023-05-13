@@ -75,6 +75,7 @@ object frmFaceDetect: TfrmFaceDetect
       '0.7'
       '0.8'
       '0.9')
+    ItemIndex = 5
     Position.X = 233.000000000000000000
     Position.Y = 8.000000000000000000
     Size.Width = 50.000000000000000000
@@ -161,7 +162,7 @@ object frmFaceDetect: TfrmFaceDetect
     Size.Height = 22.000000000000000000
     Size.PlatformDefault = False
   end
-  object ImageList: TImageList
+  object ImageList2: TImageList
     Source = <
       item
         MultiResBitmap = <>
