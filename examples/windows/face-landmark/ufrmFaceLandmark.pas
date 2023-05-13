@@ -41,7 +41,7 @@ type
   private
     FFaceLandmarkFMX: TFaceLandmarkFMX;
   public
-    procedure LoadImage;
+    procedure LoadImage(inFilename: string);
   end;
 
 var
@@ -55,10 +55,10 @@ implementation
 const
   ModelsPath = '..\..\..\..\..\models\';
 
-procedure TfrmFaceLandmark.LoadImage;
+procedure TfrmFaceLandmark.LoadImage(inFilename: string);
 begin
 {$IFDEF MSWINDOWS}
-  if not FileExists(OpenDialog.FileName) then
+  if not FileExists(inFilename) then
     Exit;
 
   if ImageMain.MultiResBitmap.Count > 0 then
@@ -66,13 +66,13 @@ begin
 
   ImageMain.MultiResBitmap.Add;
 
-  if FileExists(OpenDialog.FileName) then
+  if FileExists(inFilename) then
   begin
     if ImageList.Source[0].MultiResBitmap.Count > 0 then
       ImageList.Source[0].MultiResBitmap[0].Free;
 
     ImageList.Source[0].MultiResBitmap.Add;
-    ImageList.Source[0].MultiResBitmap[0].Bitmap.LoadFromFile(OpenDialog.FileName);
+    ImageList.Source[0].MultiResBitmap[0].Bitmap.LoadFromFile(inFilename);
   end;
 
   ImageMain.Bitmap.Assign(ImageList.Source[0].MultiResBitmap[0].Bitmap);
@@ -83,7 +83,7 @@ end;
 procedure TfrmFaceLandmark.btnOpenImageClick(Sender: TObject);
 begin
   if OpenDialog.Execute then
-    LoadImage;
+    LoadImage(OpenDialog.Filename);
 end;
 
 procedure TfrmFaceLandmark.btnDetectClick(Sender: TObject);
@@ -91,7 +91,7 @@ var
   I: DWORD;
   LFaceLandmarkData: TFaceLandmarkData;
 begin
-  LoadImage;
+  LoadImage(OpenDialog.Filename);
 
   LFaceLandmarkData := FFaceLandmarkFMX.GetLandmarkData(ImageMain.Bitmap);
 
