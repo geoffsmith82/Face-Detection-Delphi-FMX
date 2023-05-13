@@ -22,7 +22,6 @@ object frmFaceDetect: TfrmFaceDetect
     Size.Width = 780.000000000000000000
     Size.Height = 600.000000000000000000
     Size.PlatformDefault = False
-    WrapMode = Stretch
     object Label4: TLabel
       Anchors = [akLeft, akTop, akRight]
       StyledSettings = [Family]

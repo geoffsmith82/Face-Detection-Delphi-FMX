@@ -3,7 +3,8 @@ program FaceDetectionLocal;
 uses
   System.StartUpCopy,
   FMX.Forms,
-  ufrmFaceDetect in 'ufrmFaceDetect.pas' {frmFaceDetect};
+  ufrmFaceDetect in 'ufrmFaceDetect.pas' {frmFaceDetect},
+  FaceDetectFMX in '..\..\..\source\FaceDetectFMX.pas';
 
 {$R *.res}
 
