@@ -3,8 +3,7 @@ program FaceLandmark;
 uses
   System.StartUpCopy,
   FMX.Forms,
-  Unit1 in 'Unit1.pas' {Form1},
-  FaceLandmarkFMX in 'FaceLandmarkFMX.pas';
+  Unit1 in 'Unit1.pas' {Form1};
 
 {$R *.res}
 

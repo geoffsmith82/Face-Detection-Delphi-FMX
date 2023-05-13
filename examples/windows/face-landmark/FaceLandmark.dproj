@@ -281,7 +281,6 @@
             <Form>Form1</Form>
             <FormType>fmx</FormType>
         </DCCReference>
-        <DCCReference Include="FaceLandmarkFMX.pas"/>
         <BuildConfiguration Include="Base">
             <Key>Base</Key>
         </BuildConfiguration>

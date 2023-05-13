@@ -14762,7 +14762,7 @@ object Form1: TForm1
     Size.PlatformDefault = False
     WrapMode = Stretch
   end
-  object Button1: TButton
+  object btnOpenImage: TButton
     Anchors = [akLeft, akBottom]
     Position.X = 18.000000000000000000
     Position.Y = 570.000000000000000000
@@ -14771,9 +14771,9 @@ object Form1: TForm1
     Size.PlatformDefault = False
     TabOrder = 1
     Text = 'Open Image'
-    OnClick = Button1Click
+    OnClick = btnOpenImageClick
   end
-  object Button2: TButton
+  object btnDetect: TButton
     Anchors = [akLeft, akBottom]
     Position.X = 117.000000000000000000
     Position.Y = 570.000000000000000000
@@ -14782,7 +14782,7 @@ object Form1: TForm1
     Size.PlatformDefault = False
     TabOrder = 3
     Text = 'Detect'
-    OnClick = Button2Click
+    OnClick = btnDetectClick
   end
   object OpenDialog: TOpenDialog
     Left = 139

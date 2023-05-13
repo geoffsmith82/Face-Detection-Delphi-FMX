@@ -4,25 +4,42 @@ interface
 
 uses
 {$IFDEF MSWINDOWS}
-  WinApi.Windows, Vcl.Graphics,
-{$ENDIF}System.SysUtils, System.Types, System.UITypes, System.Classes, System.Variants,
-  FMX.Types, FMX.Controls, FMX.Forms, FMX.Graphics, FMX.Dialogs,
-  FMX.Controls.Presentation, FMX.StdCtrls, FMX.Objects, FMX.Utils,
-  System.ImageList, FMX.ImgList, FMX.ListBox, FaceLandmarkFMX;
+  WinApi.Windows,
+  Vcl.Graphics,
+{$ENDIF}
+  System.SysUtils,
+  System.Types,
+  System.UITypes,
+  System.Classes,
+  System.Variants,
+  FMX.Types,
+  FMX.Controls,
+  FMX.Forms,
+  FMX.Graphics,
+  FMX.Dialogs,
+  FMX.Controls.Presentation,
+  FMX.StdCtrls,
+  FMX.Objects,
+  FMX.Utils,
+  System.ImageList,
+  FMX.ImgList,
+  FMX.ListBox,
+  FaceLandmarkFMX
+  ;
 
 type
   TForm1 = class(TForm)
     ImageMain: TImage;
-    Button1: TButton;
-    Button2: TButton;
+    btnOpenImage: TButton;
+    btnDetect: TButton;
     OpenDialog: TOpenDialog;
     ImageList: TImageList;
     procedure FormCreate(Sender: TObject);
     procedure FormClose(Sender: TObject; var Action: TCloseAction);
-    procedure Button2Click(Sender: TObject);
-    procedure Button1Click(Sender: TObject);
+    procedure btnDetectClick(Sender: TObject);
+    procedure btnOpenImageClick(Sender: TObject);
   private
-
+    FFaceLandmarkFMX: TFaceLandmarkFMX;
   public
     procedure LoadImage;
   end;
@@ -37,9 +54,6 @@ implementation
 
 const
   ModelsPath = '..\..\..\..\..\models\';
-
-var
-  FaceLandmarkFMX: TFaceLandmarkFMX;
 
 procedure TForm1.LoadImage;
 begin
@@ -66,34 +80,34 @@ begin
 {$ENDIF MSWINDOWS}
 end;
 
-procedure TForm1.Button1Click(Sender: TObject);
+procedure TForm1.btnOpenImageClick(Sender: TObject);
 begin
   if OpenDialog.Execute then
     LoadImage;
 end;
 
-procedure TForm1.Button2Click(Sender: TObject);
+procedure TForm1.btnDetectClick(Sender: TObject);
 var
   I: DWORD;
-  FFaceLandmarkData: TFaceLandmarkData;
+  LFaceLandmarkData: TFaceLandmarkData;
 begin
   LoadImage;
 
-  FFaceLandmarkData := FaceLandmarkFMX.GetLandmarkData(ImageMain.Bitmap);
+  LFaceLandmarkData := FFaceLandmarkFMX.GetLandmarkData(ImageMain.Bitmap);
 
   ImageMain.Bitmap.Canvas.BeginScene;
   try
     ImageMain.Bitmap.Canvas.Fill.Color := TAlphaColorRec.White;
     ImageMain.Bitmap.Canvas.Stroke.Color := TAlphaColorRec.White;
 
-    for I := 0 to FFaceLandmarkData.Count - 1 do
+    for I := 0 to LFaceLandmarkData.Count - 1 do
     begin
       ImageMain.Bitmap.Canvas.FillRect(
         RectF(
-        FFaceLandmarkData.Points[I].X,
-        FFaceLandmarkData.Points[I].Y,
-        FFaceLandmarkData.Points[I].X + 5,
-        FFaceLandmarkData.Points[I].Y + 5),
+        LFaceLandmarkData.Points[I].X,
+        LFaceLandmarkData.Points[I].Y,
+        LFaceLandmarkData.Points[I].X + 5,
+        LFaceLandmarkData.Points[I].Y + 5),
         0, 0, AllCorners, 1);
     end;
 
@@ -107,14 +121,14 @@ begin
 {$IFDEF MSWINDOWS}
   SetPriorityClass(GetCurrentProcess, HIGH_PRIORITY_CLASS);
 
-  FaceLandmarkFMX := TFaceLandmarkFMX.Create(Self);
-  FaceLandmarkFMX.LoadModel(ModelsPath + 'face_landmark.tflite', 8);
+  FFaceLandmarkFMX := TFaceLandmarkFMX.Create(Self);
+  FFaceLandmarkFMX.LoadModel(ModelsPath + 'face_landmark.tflite', 8);
 {$ENDIF}
 end;
 
 procedure TForm1.FormClose(Sender: TObject; var Action: TCloseAction);
 begin
-  FaceLandmarkFMX.Destroy;
+  FFaceLandmarkFMX.Destroy;
 end;
 
 end.
