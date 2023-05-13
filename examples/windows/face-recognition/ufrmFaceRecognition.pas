@@ -31,20 +31,9 @@ uses
   FMX.Edit,
   FMX.ComboEdit,
   FMX.Memo.Types,
-  TensorFlowLiteFMX
+  TensorFlowLiteFMX,
+  FaceRecognitionFMX
   ;
-
-const
-  FaceNetInputSize = 112;
-  FaceNetOutputSize = 256;
-
-type
-  PInputDataFaceNet = ^TInputDataFaceNet;
-  TInputDataFaceNet = array [0 .. FaceNetInputSize - 1] of array [0 .. FaceNetInputSize - 1] of array [0 .. 3 - 1] of Float32;
-
-type
-  POutputDataFaceNet = ^TOutputDataFaceNet;
-  TOutputDataFaceNet = array [0 .. FaceNetOutputSize - 1] of Float32;
 
 type
   TfrmFaceRecognition = class(TForm)
@@ -64,9 +53,8 @@ type
     procedure btnOpenFileImageBClick(Sender: TObject);
     procedure FormDestroy(Sender: TObject);
   private
-    FFaceNet: TTensorFlowLiteFMX;
-    function CreateFaceEmbedding(inFaceImage: TImage; var outFaceEmbedding: TOutputDataFaceNet): Boolean;
     { Private declarations }
+    FFaceRec : TFaceRecognition;
   public
     procedure LoadImage(FileName: String; var Image: TImage);
   end;
@@ -78,8 +66,6 @@ implementation
 
 {$R *.fmx}
 
-const
-  ModelsPath = '..\..\..\..\..\models\';
 
 procedure TfrmFaceRecognition.LoadImage(FileName: String; var Image: TImage);
 begin
@@ -92,13 +78,13 @@ begin
 
   Image.MultiResBitmap.Add;
 
-  if FileExists(OpenDialog.FileName) then
+  if FileExists(FileName) then
   begin
     if ImageList.Source[0].MultiResBitmap.Count > 0 then
       ImageList.Source[0].MultiResBitmap[0].Free;
 
     ImageList.Source[0].MultiResBitmap.Add;
-    ImageList.Source[0].MultiResBitmap[0].Bitmap.LoadFromFile(OpenDialog.FileName);
+    ImageList.Source[0].MultiResBitmap[0].Bitmap.LoadFromFile(FileName);
   end;
 
   if ImageList.Source[1].MultiResBitmap.Count > 0 then
@@ -143,39 +129,6 @@ begin
 {$ENDIF MSWINDOWS}
 end;
 
-function TfrmFaceRecognition.CreateFaceEmbedding(inFaceImage: TImage; var outFaceEmbedding: TOutputDataFaceNet): Boolean;
-var
-  Y: Cardinal;
-  X: Cardinal;
-  LColors: PAlphaColorArray;
-  LInputData: PInputDataFaceNet;
-  LBitmapData: TBitmapData;
-begin
-  Result := False;
-  // ImageA
-  if (inFaceImage.Bitmap.Map(TMapAccess.ReadWrite, LBitmapData)) then
-  begin
-    GetMem(LInputData, FFaceNet.Input.Tensors[0].DataSize);
-    try
-      for Y := 0 to FaceNetInputSize - 1 do
-      begin
-        LColors := PAlphaColorArray(LBitmapData.GetScanline(Y));
-        for X := 0 to FaceNetInputSize - 1 do
-        begin
-          LInputData[Y][X][0] := (TAlphaColorRec(LColors[X]).R / 255);
-          LInputData[Y][X][1] := (TAlphaColorRec(LColors[X]).G / 255);
-          LInputData[Y][X][2] := (TAlphaColorRec(LColors[X]).B / 255);
-        end;
-      end;
-      FFaceNet.SetInputData(0, LInputData, FFaceNet.Input.Tensors[0].DataSize);
-    finally
-      FreeMem(LInputData);
-    end;
-    FFaceNet.Inference;
-    FFaceNet.GetOutputData(0, @outFaceEmbedding, FFaceNet.Output.Tensors[0].DataSize);
-    Result := True;
-  end;
-end;
 
 procedure TfrmFaceRecognition.btnOpenFileImageAClick(Sender: TObject);
 begin
@@ -197,13 +150,13 @@ end;
 
 procedure TfrmFaceRecognition.btnCompareAandBImageClick(Sender: TObject);
 var
-  i, X, Y: DWORD;
+  i: DWORD;
   LFaceEmbeddingA, LFaceEmbeddingB: TOutputDataFaceNet;
   LEmbedded: Float32;
 begin
   LEmbedded := 0;
-  CreateFaceEmbedding(ImageA, LFaceEmbeddingA);
-  CreateFaceEmbedding(ImageB, LFaceEmbeddingB);
+  FFaceRec.CreateFaceEmbedding(ImageA, LFaceEmbeddingA);
+  FFaceRec.CreateFaceEmbedding(ImageB, LFaceEmbeddingB);
 
     for i := 0 to FaceNetOutputSize - 1 do
       LFaceEmbeddingB[i] := (LFaceEmbeddingB[i]) - (LFaceEmbeddingA[i]);
@@ -220,19 +173,13 @@ procedure TfrmFaceRecognition.FormCreate(Sender: TObject);
 begin
 {$IFDEF MSWINDOWS}
   SetPriorityClass(GetCurrentProcess, HIGH_PRIORITY_CLASS);
-
-  FFaceNet := TTensorFlowLiteFMX.Create(Self);
-
-  // Currently Tensor Flow Lite for Windows supports only x64 CPU, GPU is not supported
-
-  FFaceNet.LoadModel(ModelsPath + 'face_recognition.tflite', 8);
+  FFaceRec := TFaceRecognition.Create;
 
 {$ENDIF}
 end;
 
 procedure TfrmFaceRecognition.FormDestroy(Sender: TObject);
 begin
-  FreeAndNil(FFaceNet);
+  FreeAndNil(FFaceRec);
 end;
-
 end.

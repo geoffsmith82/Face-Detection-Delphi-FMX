@@ -3,7 +3,8 @@ program FaceRecognitionDemo;
 uses
   System.StartUpCopy,
   FMX.Forms,
-  ufrmFaceRecognition in 'ufrmFaceRecognition.pas' {frmFaceRecognition};
+  ufrmFaceRecognition in 'ufrmFaceRecognition.pas' {frmFaceRecognition},
+  FaceRecognitionFMX in '..\..\..\source\FaceRecognitionFMX.pas';
 
 {$R *.res}
 
