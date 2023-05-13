@@ -47,6 +47,7 @@ type
     Memo1: TMemo;
     Memo2: TMemo;
     lblDetectionInfo: TLabel;
+    Label1: TLabel;
     procedure FormCreate(Sender: TObject);
     procedure btnOpenFileImageAClick(Sender: TObject);
     procedure btnCompareAandBImageClick(Sender: TObject);
@@ -148,25 +149,79 @@ begin
 {$ENDIF MSWINDOWS}
 end;
 
+function CosineDistance(const Vector1, Vector2: TOutputDataFaceNet): Double;
+var
+  DotProduct, Magnitude1, Magnitude2: Double;
+  i: Integer;
+begin
+  DotProduct := 0;
+  Magnitude1 := 0;
+  Magnitude2 := 0;
+
+  // Calculate dot product and magnitudes
+  for i := 0 to Length(Vector1) - 1 do
+  begin
+    DotProduct := DotProduct + (Vector1[i] * Vector2[i]);
+    Magnitude1 := Magnitude1 + Sqr(Vector1[i]);
+    Magnitude2 := Magnitude2 + Sqr(Vector2[i]);
+  end;
+
+  Magnitude1 := Sqrt(Magnitude1);
+  Magnitude2 := Sqrt(Magnitude2);
+
+  // Calculate cosine distance
+  Result := 1 - (DotProduct / (Magnitude1 * Magnitude2));
+end;
+
+
+procedure ConvertToUnitVector(var arr: TOutputDataFaceNet);
+var
+  i: Integer;
+  magnitude: Double;
+begin
+  // Calculate the magnitude
+  magnitude := 0.0;
+  for i := 0 to Length(arr) - 1 do
+    magnitude := magnitude + Sqr(arr[i]);
+  magnitude := Sqrt(magnitude);
+
+  // Divide each component by the magnitude
+  for i := 0 to Length(arr) - 1 do
+    arr[i] := arr[i] / magnitude;
+end;
+
+
 procedure TfrmFaceRecognition.btnCompareAandBImageClick(Sender: TObject);
 var
   i: DWORD;
-  LFaceEmbeddingA, LFaceEmbeddingB: TOutputDataFaceNet;
+  LFaceEmbeddingA, LFaceEmbeddingB, LFaceEmbeddingC: TOutputDataFaceNet;
+  LFaceEmbeddingA1, LFaceEmbeddingB1: TOutputDataFaceNet;
   LEmbedded: Float32;
 begin
   LEmbedded := 0;
   FFaceRec.CreateFaceEmbedding(ImageA, LFaceEmbeddingA);
   FFaceRec.CreateFaceEmbedding(ImageB, LFaceEmbeddingB);
 
-    for i := 0 to FaceNetOutputSize - 1 do
-      LFaceEmbeddingB[i] := (LFaceEmbeddingB[i]) - (LFaceEmbeddingA[i]);
+  for i := 0 to FaceNetOutputSize - 1 do
+  begin
+    LFaceEmbeddingA1[i] := LFaceEmbeddingA[i];
+    LFaceEmbeddingB1[i] := LFaceEmbeddingB[i];
+  end;
+  ConvertToUnitVector(LFaceEmbeddingA1);
+  ConvertToUnitVector(LFaceEmbeddingB1);
 
-    LEmbedded := System.Math.Norm(LFaceEmbeddingB);
 
-    if LEmbedded < 0.41 then
-      lblDetectionInfo.Text := 'Same Person: TRUE, Distance: ' + FloatToStr(LEmbedded)
-    else
-      lblDetectionInfo.Text := 'Same Person: FALSE, Distance: ' + FloatToStr(LEmbedded);
+  for i := 0 to FaceNetOutputSize - 1 do
+    LFaceEmbeddingC[i] := (LFaceEmbeddingB[i]) - (LFaceEmbeddingA[i]);
+
+  LEmbedded := System.Math.Norm(LFaceEmbeddingC);
+
+  if LEmbedded < 0.41 then
+    lblDetectionInfo.Text := 'Same Person: TRUE, Distance: ' + FloatToStr(LEmbedded)
+  else
+    lblDetectionInfo.Text := 'Same Person: FALSE, Distance: ' + FloatToStr(LEmbedded);
+
+  Label1.Text := 'Cosine ' + FloatToStr(CosineDistance(LFaceEmbeddingA1, LFaceEmbeddingB1));
 end;
 
 procedure TfrmFaceRecognition.FormCreate(Sender: TObject);
