@@ -2,3 +2,4 @@
 examples/windows/face-detect/__history
 *.dcu
 *.local
+examples/windows/face-landmark/__history
