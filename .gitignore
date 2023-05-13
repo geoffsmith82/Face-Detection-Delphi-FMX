@@ -4,3 +4,6 @@ examples/windows/face-detect/__history
 *.local
 examples/windows/face-landmark/__history
 source/__history
+examples/windows/face-detect/Win64/Release/FaceDetectionLocal.exe
+examples/windows/face-recognition/Win64/Release/FaceRecognitionDemo.exe
+examples/windows/face-landmark/Win64/Release/FaceLandmark.exe

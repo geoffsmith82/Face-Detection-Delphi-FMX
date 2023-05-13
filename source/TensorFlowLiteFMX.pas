@@ -3,7 +3,13 @@ unit TensorFlowLiteFMX;
 interface
 
 uses
-  System.SysUtils, System.Types, System.UITypes, System.Classes, System.Variants, FMX.Types, System.IOUtils
+  System.SysUtils,
+  System.Types,
+  System.UITypes,
+  System.Classes,
+  System.Variants,
+  System.IOUtils,
+  FMX.Types
 
 {$IFDEF ANDROID}
 
@@ -206,9 +212,9 @@ end;
 
 constructor TTensorFlowLiteFMX.Create(AOwner: TComponent);
 var
-  FPath: String;
-  FMarshaller: TMarshaller;
-  FPointer: Pointer;
+  LPath: String;
+  LMarshaller: TMarshaller;
+  LPointer: Pointer;
 begin
   inherited Create(AOwner);
 
@@ -220,16 +226,16 @@ begin
   UseGpu := False;
 
 {$IFDEF MSWINDOWS}
-  FPath := LibraryPath;
-  LibraryModule := WinApi.Windows.LoadLibrary(PWideChar(FPath));
+  LPath := LibraryPath;
+  LibraryModule := WinApi.Windows.LoadLibrary(PWideChar(LPath));
 
 {$ENDIF MSWINDOWS}
 
 {$IFDEF ANDROID}
-  FPath := System.IOUtils.TPath.Combine(System.IOUtils.TPath.GetHomePath, LibraryPath);
+  LPath := System.IOUtils.TPath.Combine(System.IOUtils.TPath.GetHomePath, LibraryPath);
   LibraryModule := System.SysUtils.LoadLibrary(PWideChar(FPath));
 
-  FPath := System.IOUtils.TPath.Combine(System.IOUtils.TPath.GetHomePath, LibraryPathGPU);
+  LPath := System.IOUtils.TPath.Combine(System.IOUtils.TPath.GetHomePath, LibraryPathGPU);
   LibraryModuleGPU := System.SysUtils.LoadLibrary(PWideChar(FPath));
 
 {$ENDIF ANDROID}
@@ -311,10 +317,12 @@ end;
 function TTensorFlowLiteFMX.LoadModel(ModelPath: String; InterpreterThreadCount: Integer): TFLiteStatus;
 var
   i: Int32;
-  FMarshaller: TMarshaller;
-  FPointer: Pointer;
-  FStatus: TFLiteStatus;
-  FDelegateOptions: TfLiteGpuDelegateOptionsV2;
+  LMarshaller: TMarshaller;
+  LPointer: Pointer;
+  LStatus: TFLiteStatus;
+{$IFDEF ANDROID}
+  LDelegateOptions: TfLiteGpuDelegateOptionsV2;
+{$ENDIF}
 begin
   Result := TFLiteError;
 
@@ -346,13 +354,13 @@ begin
   end;
 
 {$IFDEF ANDROID}
-  FDelegateOptions.is_precision_loss_allowed := 1;
-  FDelegateOptions.inference_preference := Int32(TFLITE_GPU_INFERENCE_PREFERENCE_FAST_SINGLE_ANSWER);
-  FDelegateOptions.inference_priority1 := Int32(TFLITE_GPU_INFERENCE_PRIORITY_MIN_LATENCY);
-  FDelegateOptions.inference_priority2 := Int32(TFLITE_GPU_INFERENCE_PRIORITY_AUTO);
-  FDelegateOptions.inference_priority3 := Int32(TFLITE_GPU_INFERENCE_PRIORITY_AUTO);
+  LDelegateOptions.is_precision_loss_allowed := 1;
+  LDelegateOptions.inference_preference := Int32(TFLITE_GPU_INFERENCE_PREFERENCE_FAST_SINGLE_ANSWER);
+  LDelegateOptions.inference_priority1 := Int32(TFLITE_GPU_INFERENCE_PRIORITY_MIN_LATENCY);
+  LDelegateOptions.inference_priority2 := Int32(TFLITE_GPU_INFERENCE_PRIORITY_AUTO);
+  LDelegateOptions.inference_priority3 := Int32(TFLITE_GPU_INFERENCE_PRIORITY_AUTO);
 
-  GpuDelegate := GpuDelegateV2Create(@FDelegateOptions);
+  GpuDelegate := GpuDelegateV2Create(@LDelegateOptions);
 
   if (GpuDelegate <> nil) and (UseGpu = True) then
   begin
@@ -371,9 +379,9 @@ begin
     Exit;
   end;
 
-  FStatus := InterpreterAllocateTensors(Interpreter);
+  LStatus := InterpreterAllocateTensors(Interpreter);
 
-  if FStatus <> TFLiteOk then
+  if LStatus <> TFLiteOk then
   begin
     raise ETensorFlowLiteFMXError.Create('Error:TfLiteInterpreterAllocateTensors');
     Exit;

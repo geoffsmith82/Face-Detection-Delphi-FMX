@@ -38,7 +38,7 @@ type
 
   TFaceLandmarkFMX = class(TComponent)
   private
-    FaceLandmark: TTensorFlowLiteFMX;
+    FFaceLandmark: TTensorFlowLiteFMX;
 
     FInputData: TInputDataFaceLandmark;
     FOutputData: TOutputDataFaceLandmark;
@@ -58,13 +58,12 @@ implementation
 
 function TFaceLandmarkFMX.GetLandmarkData(Bitmap: TBitmap): TFaceLandmarkData;
 var
-  FPixel, X, Y: DWORD;
-  FColors: PAlphaColorArray;
-  FBitmapData: TBitmapData;
-  FBitmap: TBitmap;
-  FStatus: TFLiteStatus;
-  FScale: Float32;
-  FRect: TRectF;
+  LPixel, X, Y: DWORD;
+  LColors: PAlphaColorArray;
+  LBitmapData: TBitmapData;
+  LBitmap: TBitmap;
+  LStatus: TFLiteStatus;
+  LRect: TRectF;
 begin
   SetLength(Result.Points, 0);
   Result.Count := 0;
@@ -72,68 +71,68 @@ begin
   if not Assigned(Bitmap) then
     Exit;
 
-  FBitmap := TBitmap.Create;
+  LBitmap := TBitmap.Create;
 
-  FBitmap.Width := FaceLandmarkInputSize;
-  FBitmap.Height := FaceLandmarkInputSize;
+  LBitmap.Width := FaceLandmarkInputSize;
+  LBitmap.Height := FaceLandmarkInputSize;
 
-  FBitmap.Canvas.BeginScene;
+  LBitmap.Canvas.BeginScene;
   try
-    FBitmap.Canvas.Clear(TAlphaColorRec.Null);
+    LBitmap.Canvas.Clear(TAlphaColorRec.Null);
 
     Bitmap.Canvas.BeginScene;
     try
-      FRect.Left := 0;
-      FRect.Top := 0;
-      FRect.Width := FaceLandmarkInputSize;
-      FRect.Height := FaceLandmarkInputSize;
+      LRect.Left := 0;
+      LRect.Top := 0;
+      LRect.Width := FaceLandmarkInputSize;
+      LRect.Height := FaceLandmarkInputSize;
 
-      FBitmap.Canvas.DrawBitmap(
+      LBitmap.Canvas.DrawBitmap(
         Bitmap,
         Bitmap.BoundsF,
-        FRect,
+        LRect,
         1, False);
     finally
       Bitmap.Canvas.EndScene;
     end;
   finally
-    FBitmap.Canvas.EndScene;
+    LBitmap.Canvas.EndScene;
   end;
 
-  if (FBitmap.Map(TMapAccess.ReadWrite, FBitmapData)) then
+  if (LBitmap.Map(TMapAccess.ReadWrite, LBitmapData)) then
   begin
     try
       for Y := 0 to FaceLandmarkInputSize - 1 do
       begin
-        FColors := PAlphaColorArray(FBitmapData.GetScanline(Y));
+        LColors := PAlphaColorArray(LBitmapData.GetScanline(Y));
 
         for X := 0 to FaceLandmarkInputSize - 1 do
         begin
-          FInputData[Y][X][0] := (TAlphaColorRec(FColors[X]).R);
-          FInputData[Y][X][1] := (TAlphaColorRec(FColors[X]).G);
-          FInputData[Y][X][2] := (TAlphaColorRec(FColors[X]).B);
+          FInputData[Y][X][0] := (TAlphaColorRec(LColors[X]).R);
+          FInputData[Y][X][1] := (TAlphaColorRec(LColors[X]).G);
+          FInputData[Y][X][2] := (TAlphaColorRec(LColors[X]).B);
         end;
       end;
 
-      FStatus := FaceLandmark.SetInputData(0, @FInputData, FaceLandmark.Input.Tensors[0].DataSize);
+      LStatus := FFaceLandmark.SetInputData(0, @FInputData, FFaceLandmark.Input.Tensors[0].DataSize);
 
-      if FStatus <> TFLiteOk then
+      if LStatus <> TFLiteOk then
       begin
         raise ETensorFlowLiteFMXError.Create('Error: SetInputData');
         Exit;
       end;
 
-      FStatus := FaceLandmark.Inference;
+      LStatus := FFaceLandmark.Inference;
 
-      if FStatus <> TFLiteOk then
+      if LStatus <> TFLiteOk then
       begin
         raise ETensorFlowLiteFMXError.Create('Error: Inference');
         Exit;
       end;
 
-      FStatus := FaceLandmark.GetOutputData(2, @FOutputData, FaceLandmark.Output.Tensors[2].DataSize);
+      LStatus := FFaceLandmark.GetOutputData(2, @FOutputData, FFaceLandmark.Output.Tensors[2].DataSize);
 
-      if FStatus <> TFLiteOk then
+      if LStatus <> TFLiteOk then
       begin
         raise ETensorFlowLiteFMXError.Create('Error: GetOutputData');
         Exit;
@@ -142,32 +141,32 @@ begin
       SetLength(Result.Points, FaceLandmarkOutputSize div 2);
       Result.Count := FaceLandmarkOutputSize div 2;
 
-      FPixel := 0;
+      LPixel := 0;
 
       for X := 0 to FaceLandmarkOutputSize div 2 - 1 do
       begin
-        Result.Points[FPixel].X := FOutputData[FPixel][0] * Bitmap.Width;
-        Result.Points[FPixel].Y := FOutputData[FPixel][1] * Bitmap.Height;
+        Result.Points[LPixel].X := FOutputData[LPixel][0] * Bitmap.Width;
+        Result.Points[LPixel].Y := FOutputData[LPixel][1] * Bitmap.Height;
 
-        Inc(FPixel);
+        Inc(LPixel);
       end;
 
     finally
-      FBitmap.Unmap(FBitmapData);
+      LBitmap.Unmap(LBitmapData);
     end;
   end;
 end;
 
 function TFaceLandmarkFMX.LoadModel(ModelPath: String; ThreadCount: Integer): TFLiteStatus;
 begin
-  FaceLandmark.UseGpu := UseGpu;
+  FFaceLandmark.UseGpu := UseGpu;
 
-  Result := FaceLandmark.LoadModel(ModelPath, ThreadCount);
+  Result := FFaceLandmark.LoadModel(ModelPath, ThreadCount);
 end;
 
 procedure TFaceLandmarkFMX.UnloadModel;
 begin
-  FaceLandmark.UnloadModel;
+  FFaceLandmark.UnloadModel;
 end;
 
 constructor TFaceLandmarkFMX.Create(AOwner: TComponent);
@@ -176,12 +175,12 @@ begin
 
   UseGpu := False;
 
-  FaceLandmark := TTensorFlowLiteFMX.Create(Self);
+  FFaceLandmark := TTensorFlowLiteFMX.Create(Self);
 end;
 
 destructor TFaceLandmarkFMX.Destroy;
 begin
-  FaceLandmark.Destroy;
+  FFaceLandmark.Destroy;
 
   inherited Destroy;
 end;
