@@ -180,10 +180,11 @@ procedure TfrmFaceDetect.FormCreate(Sender: TObject);
 begin
 {$IFDEF MSWINDOWS}
   SetPriorityClass(GetCurrentProcess, HIGH_PRIORITY_CLASS);
+{$ENDIF}
   FFaceDetect := TFaceDetect.Create(Self);
   FFaceDetect.OnCompletion := OnCompletion;
   FFaceDetect.OnFoundFaces := OnFoundFaces;
-{$ENDIF}
+
 end;
 
 procedure TfrmFaceDetect.FormClose(Sender: TObject; var Action: TCloseAction);

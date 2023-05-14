@@ -133,7 +133,6 @@ end;
 
 procedure TFaceDetect.LoadImage(ImageMain: TImage; inFilename: string);
 begin
-{$IFDEF MSWINDOWS}
   if not FileExists(inFilename) then
     Exit;
 
@@ -190,7 +189,6 @@ begin
 
   ImageMain.Bitmap.Assign(FImageList.Source[1].MultiResBitmap[0].Bitmap);
 
-{$ENDIF MSWINDOWS}
 end;
 
 

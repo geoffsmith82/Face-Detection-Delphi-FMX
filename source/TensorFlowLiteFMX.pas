@@ -213,8 +213,10 @@ end;
 constructor TTensorFlowLiteFMX.Create(AOwner: TComponent);
 var
   LPath: String;
+{$IFDEF ANDROID}
   LMarshaller: TMarshaller;
   LPointer: Pointer;
+{$ENDIF}
 begin
   inherited Create(AOwner);
 
@@ -233,10 +235,10 @@ begin
 
 {$IFDEF ANDROID}
   LPath := System.IOUtils.TPath.Combine(System.IOUtils.TPath.GetHomePath, LibraryPath);
-  LibraryModule := System.SysUtils.LoadLibrary(PWideChar(FPath));
+  LibraryModule := System.SysUtils.LoadLibrary(PWideChar(LPath));
 
   LPath := System.IOUtils.TPath.Combine(System.IOUtils.TPath.GetHomePath, LibraryPathGPU);
-  LibraryModuleGPU := System.SysUtils.LoadLibrary(PWideChar(FPath));
+  LibraryModuleGPU := System.SysUtils.LoadLibrary(PWideChar(LPath));
 
 {$ENDIF ANDROID}
   if (LibraryModule = 0) then
@@ -317,10 +319,10 @@ end;
 function TTensorFlowLiteFMX.LoadModel(ModelPath: String; InterpreterThreadCount: Integer): TFLiteStatus;
 var
   i: Int32;
-  LMarshaller: TMarshaller;
-  LPointer: Pointer;
   LStatus: TFLiteStatus;
 {$IFDEF ANDROID}
+  LMarshaller: TMarshaller;
+  LPointer: Pointer;
   LDelegateOptions: TfLiteGpuDelegateOptionsV2;
 {$ENDIF}
 begin
@@ -331,8 +333,8 @@ begin
   UnloadModel;
 
 {$IFDEF ANDROID}
-  FPointer := FMarshaller.AsAnsi(System.IOUtils.TPath.Combine(System.IOUtils.TPath.GetHomePath, ModelPath)).ToPointer;
-  Model := ModelCreateFromFile(FPointer);
+  LPointer := LMarshaller.AsAnsi(System.IOUtils.TPath.Combine(System.IOUtils.TPath.GetHomePath, ModelPath)).ToPointer;
+  Model := ModelCreateFromFile(LPointer);
   ModelFileName := ModelPath;
 {$ENDIF ANDROID}
 {$IFDEF MSWINDOWS}
