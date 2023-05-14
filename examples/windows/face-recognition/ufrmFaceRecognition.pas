@@ -66,7 +66,7 @@ type
     Memo1: TMemo;
     Memo2: TMemo;
     lblDetectionInfo: TLabel;
-    Label1: TLabel;
+    lblCosineDistance: TLabel;
     PhysPgDriverLink: TFDPhysPgDriverLink;
     EmbeddingConnection: TFDConnection;
     Button1: TButton;
@@ -178,7 +178,7 @@ var
   filenames : TArray<string>;
   i, j: Integer;
   ImageA : TImage;
-  LFaceEmbeddingA, LFaceEmbeddingB, LFaceEmbeddingC: TOutputDataFaceNet;
+  LFaceEmbeddingA : TOutputDataFaceNet;
 begin
   query := TFDQuery.Create(nil);
   try
@@ -288,7 +288,7 @@ begin
   else
     lblDetectionInfo.Text := 'Same Person: FALSE, Distance: ' + FloatToStr(LEmbedded);
 
-  Label1.Text := 'Cosine ' + FloatToStr(CosineDistance(LFaceEmbeddingA1, LFaceEmbeddingB1));
+  lblCosineDistance.Text := 'Cosine ' + FloatToStr(CosineDistance(LFaceEmbeddingA1, LFaceEmbeddingB1));
 end;
 
 procedure TfrmFaceRecognition.FormCreate(Sender: TObject);

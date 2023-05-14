@@ -35,15 +35,14 @@ type
     btnOpenImage: TButton;
     btnDetectFaces: TButton;
     OpenDialog: TOpenDialog;
-    ImageList2: TImageList;
     cboProbability: TComboBox;
-    Label1: TLabel;
+    lblProbability: TLabel;
     cboThreadCount: TComboBox;
-    Label2: TLabel;
+    lblThreadCount: TLabel;
     cboInputSize: TComboBox;
-    Label3: TLabel;
+    lblInputSize: TLabel;
     Label4: TLabel;
-    Label5: TLabel;
+    lblBatchSize: TLabel;
     edtBatchSize: TEdit;
     procedure FormCreate(Sender: TObject);
     procedure FormClose(Sender: TObject; var Action: TCloseAction);
@@ -52,7 +51,7 @@ type
     procedure cboThreadCountChange(Sender: TObject);
     procedure cboInputSizeChange(Sender: TObject);
   private
-    FaceDetect : TFaceDetect;
+    FFaceDetect : TFaceDetect;
     procedure OnCompletion(detectms: Integer; nms: Integer ; inCount: Integer);
     procedure OnFoundFaces(faceList: TFaceList);
   public
@@ -106,16 +105,16 @@ end;
 procedure TfrmFaceDetect.btnOpenImageClick(Sender: TObject);
 begin
   if OpenDialog.Execute then
-    FaceDetect.LoadImage(ImageMain, OpenDialog.FileName);
+    FFaceDetect.LoadImage(ImageMain, OpenDialog.FileName);
 end;
 
 procedure TfrmFaceDetect.btnDetectFacesClick(Sender: TObject);
 var
   Probability : Float32;
 begin
-  FaceDetect.BatchSize := StrToIntDef(edtBatchSize.Text, 1);
+  FFaceDetect.BatchSize := StrToIntDef(edtBatchSize.Text, 1);
   Probability := StrToFloat(cboProbability.Items[cboProbability.ItemIndex]);
-  FaceDetect.DetectFaces(Probability, ImageMain, OpenDialog.FileName);
+  FFaceDetect.DetectFaces(Probability, ImageMain, OpenDialog.FileName);
 end;
 
 
@@ -124,45 +123,45 @@ begin
   case cboInputSize.ItemIndex of
     0:
       begin
-        FaceDetect.FaceDetectionInputSize := 160;
-        FaceDetect.FaceDetectionOutputSize := 1575;
-        FaceDetect.LoadModel(ModelsPath + 'face_detection_160.tflite', StrToInt(cboThreadCount.Items[cboThreadCount.ItemIndex]));
+        FFaceDetect.FaceDetectionInputSize := 160;
+        FFaceDetect.FaceDetectionOutputSize := 1575;
+        FFaceDetect.LoadModel(ModelsPath + 'face_detection_160.tflite', StrToInt(cboThreadCount.Items[cboThreadCount.ItemIndex]));
       end;
     1:
       begin
-        FaceDetect.FaceDetectionInputSize := 192;
-        FaceDetect.FaceDetectionOutputSize := 2268;
-        FaceDetect.LoadModel(ModelsPath + 'face_detection_192.tflite', StrToInt(cboThreadCount.Items[cboThreadCount.ItemIndex]));
+        FFaceDetect.FaceDetectionInputSize := 192;
+        FFaceDetect.FaceDetectionOutputSize := 2268;
+        FFaceDetect.LoadModel(ModelsPath + 'face_detection_192.tflite', StrToInt(cboThreadCount.Items[cboThreadCount.ItemIndex]));
       end;
     2:
       begin
-        FaceDetect.FaceDetectionInputSize := 256;
-        FaceDetect.FaceDetectionOutputSize := 4032;
-        FaceDetect.LoadModel(ModelsPath + 'face_detection_256.tflite', StrToInt(cboThreadCount.Items[cboThreadCount.ItemIndex]));
+        FFaceDetect.FaceDetectionInputSize := 256;
+        FFaceDetect.FaceDetectionOutputSize := 4032;
+        FFaceDetect.LoadModel(ModelsPath + 'face_detection_256.tflite', StrToInt(cboThreadCount.Items[cboThreadCount.ItemIndex]));
       end;
     3:
       begin
-        FaceDetect.FaceDetectionInputSize := 320;
-        FaceDetect.FaceDetectionOutputSize := 6300;
-        FaceDetect.LoadModel(ModelsPath + 'face_detection_320.tflite', StrToInt(cboThreadCount.Items[cboThreadCount.ItemIndex]));
+        FFaceDetect.FaceDetectionInputSize := 320;
+        FFaceDetect.FaceDetectionOutputSize := 6300;
+        FFaceDetect.LoadModel(ModelsPath + 'face_detection_320.tflite', StrToInt(cboThreadCount.Items[cboThreadCount.ItemIndex]));
       end;
     4:
       begin
-        FaceDetect.FaceDetectionInputSize := 480;
-        FaceDetect.FaceDetectionOutputSize := 14175;
-        FaceDetect.LoadModel(ModelsPath + 'face_detection_480.tflite', StrToInt(cboThreadCount.Items[cboThreadCount.ItemIndex]));
+        FFaceDetect.FaceDetectionInputSize := 480;
+        FFaceDetect.FaceDetectionOutputSize := 14175;
+        FFaceDetect.LoadModel(ModelsPath + 'face_detection_480.tflite', StrToInt(cboThreadCount.Items[cboThreadCount.ItemIndex]));
       end;
     5:
       begin
-        FaceDetect.FaceDetectionInputSize := 640;
-        FaceDetect.FaceDetectionOutputSize := 25200;
-        FaceDetect.LoadModel(ModelsPath + 'face_detection_640.tflite', StrToInt(cboThreadCount.Items[cboThreadCount.ItemIndex]));
+        FFaceDetect.FaceDetectionInputSize := 640;
+        FFaceDetect.FaceDetectionOutputSize := 25200;
+        FFaceDetect.LoadModel(ModelsPath + 'face_detection_640.tflite', StrToInt(cboThreadCount.Items[cboThreadCount.ItemIndex]));
       end;
     6:
       begin
-        FaceDetect.FaceDetectionInputSize := 800;
-        FaceDetect.FaceDetectionOutputSize := 39375;
-        FaceDetect.LoadModel(ModelsPath + 'face_detection_800.tflite', StrToInt(cboThreadCount.Items[cboThreadCount.ItemIndex]));
+        FFaceDetect.FaceDetectionInputSize := 800;
+        FFaceDetect.FaceDetectionOutputSize := 39375;
+        FFaceDetect.LoadModel(ModelsPath + 'face_detection_800.tflite', StrToInt(cboThreadCount.Items[cboThreadCount.ItemIndex]));
       end;
   end;
 end;
@@ -181,15 +180,15 @@ procedure TfrmFaceDetect.FormCreate(Sender: TObject);
 begin
 {$IFDEF MSWINDOWS}
   SetPriorityClass(GetCurrentProcess, HIGH_PRIORITY_CLASS);
-  FaceDetect := TFaceDetect.Create(Self);
-  FaceDetect.OnCompletion := OnCompletion;
-  FaceDetect.OnFoundFaces := OnFoundFaces;
+  FFaceDetect := TFaceDetect.Create(Self);
+  FFaceDetect.OnCompletion := OnCompletion;
+  FFaceDetect.OnFoundFaces := OnFoundFaces;
 {$ENDIF}
 end;
 
 procedure TfrmFaceDetect.FormClose(Sender: TObject; var Action: TCloseAction);
 begin
-  FreeAndNil(FaceDetect);
+  FreeAndNil(FFaceDetect);
 end;
 
 end.

@@ -97,13 +97,13 @@ object frmFaceRecognition: TfrmFaceRecognition
     Text = 'Same Person: False, Distance: 0'
     TabOrder = 16
   end
-  object Label1: TLabel
+  object lblCosineDistance: TLabel
     Position.X = 22.000000000000000000
     Position.Y = 56.000000000000000000
     Size.Width = 275.000000000000000000
     Size.Height = 17.000000000000000000
     Size.PlatformDefault = False
-    Text = 'Label1'
+    Text = 'lblCosineDistance'
     TabOrder = 19
   end
   object Button1: TButton

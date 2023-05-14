@@ -82,7 +82,7 @@ object frmFaceDetect: TfrmFaceDetect
     Size.PlatformDefault = False
     TabOrder = 6
   end
-  object Label1: TLabel
+  object lblProbability: TLabel
     AutoSize = True
     Position.X = 163.000000000000000000
     Position.Y = 11.000000000000000000
@@ -106,7 +106,7 @@ object frmFaceDetect: TfrmFaceDetect
     TabOrder = 8
     OnChange = cboThreadCountChange
   end
-  object Label2: TLabel
+  object lblThreadCount: TLabel
     Position.X = 12.000000000000000000
     Position.Y = 11.000000000000000000
     Size.Width = 85.000000000000000000
@@ -133,7 +133,7 @@ object frmFaceDetect: TfrmFaceDetect
     TabOrder = 12
     OnChange = cboInputSizeChange
   end
-  object Label3: TLabel
+  object lblInputSize: TLabel
     Position.X = 298.000000000000000000
     Position.Y = 11.000000000000000000
     Size.Width = 56.000000000000000000
@@ -142,7 +142,7 @@ object frmFaceDetect: TfrmFaceDetect
     Text = 'Input Size'
     TabOrder = 13
   end
-  object Label5: TLabel
+  object lblBatchSize: TLabel
     Position.X = 436.000000000000000000
     Position.Y = 11.000000000000000000
     Size.Width = 54.000000000000000000
@@ -160,27 +160,5 @@ object frmFaceDetect: TfrmFaceDetect
     Size.Width = 48.000000000000000000
     Size.Height = 22.000000000000000000
     Size.PlatformDefault = False
-  end
-  object ImageList2: TImageList
-    Source = <
-      item
-        MultiResBitmap = <>
-        Name = 'Source'
-      end
-      item
-        MultiResBitmap = <>
-        Name = 'FaceSegment'
-      end
-      item
-        MultiResBitmap = <>
-        Name = 'IrisLeft'
-      end
-      item
-        MultiResBitmap = <>
-        Name = 'IrisRight'
-      end>
-    Destination = <>
-    Left = 138
-    Top = 300
   end
 end
