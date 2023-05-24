@@ -5,7 +5,6 @@ interface
 uses
 {$IFDEF MSWINDOWS}
   WinApi.Windows,
-  Vcl.Graphics,
 {$ENDIF}
   System.SysUtils,
   System.Types,

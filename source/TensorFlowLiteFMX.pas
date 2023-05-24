@@ -371,7 +371,7 @@ begin
   end
   else // GPU acceleration is not supported
 {$ENDIF ANDROID}
-    InterpreterOptionsSetNumThreads(InterpreterOptions, InterpreterThreadCount);
+  InterpreterOptionsSetNumThreads(InterpreterOptions, InterpreterThreadCount);
 
   Interpreter := InterpreterCreate(Model, InterpreterOptions);
 

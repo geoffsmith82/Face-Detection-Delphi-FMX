@@ -7,3 +7,7 @@ source/__history
 examples/windows/face-detect/Win64/Release/FaceDetectionLocal.exe
 examples/windows/face-recognition/Win64/Release/FaceRecognitionDemo.exe
 examples/windows/face-landmark/Win64/Release/FaceLandmark.exe
+*.rsm
+examples/windows/face-detect/Android64
+examples/windows/face-loadDB/__history
+examples/windows/face-recognition/Android64
